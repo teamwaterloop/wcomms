@@ -37,7 +37,7 @@ func StringToType(pStr string) PacketType {
 		return Sensor
 	case "command":
 		return Command
-	case "State":
+	case "state":
 		return State
 	case "log":
 		return Log
