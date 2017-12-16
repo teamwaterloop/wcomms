@@ -5,34 +5,6 @@ import (
 	"testing"
 )
 
-func TestReadBit(t *testing.T) {
-	var buf = []byte{3, 12, 128, 99}
-	if ReadBit(buf, 0) < 1 {
-		t.Fail()
-	}
-	if ReadBit(buf, 1) < 1 {
-		t.Fail()
-	}
-	if ReadBit(buf, 7) != 0 {
-		t.Fail()
-	}
-	if ReadBit(buf, 9) != 0 {
-		t.Fail()
-	}
-	if ReadBit(buf, 10) < 1 {
-		t.Fail()
-	}
-	if ReadBit(buf, 23) < 1 {
-		t.Fail()
-	}
-	if ReadBit(buf, 25) < 1 {
-		t.Fail()
-	}
-	if ReadBit(buf, 31) != 0 {
-		t.Fail()
-	}
-}
-
 func TestSetBit(t *testing.T) {
 	var buf = []byte{255, 255, 255, 255}
 	SetBits(buf, 629, 10, 10)
@@ -147,29 +119,27 @@ func TestWriteSegments(t *testing.T) {
 	WriteSegments(nbuf, shape, result)
 	for i := 0; i < 4; i++ {
 		if nbuf[i] != buf[i] {
-			t.Error("Expected %d but got %d at %d", buf[i], nbuf[i], i)
+			t.Errorf("Expected %d but got %d at %d", buf[i], nbuf[i], i)
 			t.Fail()
 		}
 	}
 }
 
-func TestEncodePacketName(t *testing.T) {
-	var bits uint32 = 252
-	name := GetPacketName(bits)
-	if EncodePacketName(name) != bits {
-		t.Fail()
-	}
-}
-
 func TestDecodeFloat18(t *testing.T) {
-	var result = DecodeFloat18(223862)
-	var expected float32 = -724.99
+	var result = DecodeFloat18(231079)
+	var expected float32 = -724.875
 	if math.Abs(float64(result-expected)) > 0.00001 {
 		t.Errorf("Expected %.2f but go %.2f", expected, result)
 		t.Fail()
 	}
-	result = DecodeFloat18(108341)
-	expected = 846.53
+	result = DecodeFloat18(100980)
+	expected = 846.5
+	if math.Abs(float64(result-expected)) > 0.00001 {
+		t.Errorf("Expected %.2f but go %.2f", expected, result)
+		t.Fail()
+	}
+	result = DecodeFloat18(97193)
+	expected = 442.5625
 	if math.Abs(float64(result-expected)) > 0.00001 {
 		t.Errorf("Expected %.2f but go %.2f", expected, result)
 		t.Fail()
@@ -177,35 +147,33 @@ func TestDecodeFloat18(t *testing.T) {
 }
 
 func TestEncodeFloat18(t *testing.T) {
-	if EncodeFloat18(-724.99) != 223843 {
+	if EncodeFloat18(-724.99) != 231079 {
 		t.Fail()
 	}
-	if EncodeFloat18(846.53) != 108341 {
+	if EncodeFloat18(846.53) != 100980 {
+		t.Fail()
+	}
+	if EncodeFloat18(442.59) != 97193 {
 		t.Fail()
 	}
 }
 
 func TestReadPacket(t *testing.T) {
-	var buf = []byte{181, 237, 212, 174, 57, 109, 167, 155}
+	var buf = []byte{178, 157, 26, 78, 167, 88, 234, 94}
 	var packet = ReadPacket(buf)
 	var expected = CommPacket{
-		integrity:  true,
 		PacketType: State,
-		PacketName: "sensor54",
-		Data1:      -724.99,
-		Data2:      846.53,
-		Data3:      442.59,
-	}
-	if packet.integrity != expected.integrity {
-		t.Errorf("Expected integrity [%b] but got [%b]", expected.integrity, packet.integrity)
-		t.Fail()
+		PacketId:   54,
+		Data1:      -724.875,
+		Data2:      846.5,
+		Data3:      442.5625,
 	}
 	if packet.PacketType != expected.PacketType {
 		t.Errorf("Expected packet type [%d] but got [%d]", expected.PacketType, packet.PacketType)
 		t.Fail()
 	}
-	if packet.PacketName != expected.PacketName {
-		t.Errorf("Expected packet name [%s] but got [%s]", expected.PacketName, packet.PacketName)
+	if packet.PacketId != expected.PacketId {
+		t.Errorf("Expected packet name [%s] but got [%s]", expected.PacketId, packet.PacketId)
 		t.Fail()
 	}
 	if math.Abs(float64(packet.Data1-expected.Data1)) > 0.00001 {
