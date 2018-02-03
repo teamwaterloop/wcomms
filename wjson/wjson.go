@@ -1,7 +1,7 @@
 package wjson
 
 import (
-	wbin "github.com/mogball/wcomms/wbinary"
+	wbin "github.com/teamwaterloop/wcomms/wbinary"
 	"time"
 	"encoding/json"
 )
