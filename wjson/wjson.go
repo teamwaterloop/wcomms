@@ -1,7 +1,7 @@
 package wjson
 
 import (
-	wbin "github.com/teamwaterloop/wcomms/wbinary"
+	wbin "github.com/waterloop/wcomms/wbinary"
 	"time"
 	"encoding/json"
 )
