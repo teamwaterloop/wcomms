@@ -1,9 +1,10 @@
 package wjson
 
 import (
-	wbin "github.com/waterloop/wcomms/wbinary"
-	"time"
-	"encoding/json"
+    "time"
+    "encoding/json"
+
+	wbin "wcomms/wbinary"
 )
 
 type CommPacketJson struct {
@@ -13,13 +14,15 @@ type CommPacketJson struct {
 	Data []float32 `json:"data"`
 }
 
-func CurrentTimeMs() int64 {
+// Helper to get time in milliseconds
+func currentTimeMs() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
+// Converts Binary Communication Packet to JSON string/bytes
 func PacketEncodeJson(packet *wbin.CommPacket) ([]byte, error) {
 	packetJson := &CommPacketJson{
-		Time: CurrentTimeMs(),
+		Time: currentTimeMs(),
 		Type: wbin.TypeToString(packet.PacketType),
 		Id:   packet.PacketId,
 		Data: []float32{packet.Data1, packet.Data2, packet.Data3},
@@ -27,6 +30,7 @@ func PacketEncodeJson(packet *wbin.CommPacket) ([]byte, error) {
 	return json.Marshal(packetJson)
 }
 
+// Converts JSON string/bytes to Binary Communication Packet
 func PacketDecodeJson(encoded []byte) (*wbin.CommPacket, error) {
 	packetJson := &CommPacketJson{}
 	err := json.Unmarshal(encoded, packetJson)

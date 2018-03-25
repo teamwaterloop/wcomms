@@ -2,7 +2,8 @@ package wjson
 
 import (
 	"testing"
-	"github.com/mogball/wcomms/wbinary"
+
+	"wcomms/wbinary"
 )
 
 func TestPacketDecodeJson(t *testing.T) {
