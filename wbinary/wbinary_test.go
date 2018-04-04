@@ -7,13 +7,13 @@ import (
 
 func TestSetBit(t *testing.T) {
 	var buf = []byte{255, 255, 255, 255}
-	setBits(buf, 629, 10, 10)
-	if readBits(buf, 10, 19) != 629 {
+	SetBits(buf, 629, 10, 10)
+	if ReadBits(buf, 10, 19) != 629 {
 		t.Fail()
 	}
 	buf = []byte{0, 0, 0, 0}
-	setBits(buf, 629, 10, 10)
-	if readBits(buf, 10, 19) != 629 {
+	SetBits(buf, 629, 10, 10)
+	if ReadBits(buf, 10, 19) != 629 {
 		t.Fail()
 	}
 }
@@ -21,41 +21,41 @@ func TestSetBit(t *testing.T) {
 func TestReadBits(t *testing.T) {
 	var buf = []byte{3, 172, 128, 99}
 	for i := 1; i < 8; i++ {
-		if readBits(buf, 0, uint(i)) != 3 {
+		if ReadBits(buf, 0, uint(i)) != 3 {
 			t.Fail()
 		}
 	}
-	if readBits(buf, 0, 0) != 1 {
+	if ReadBits(buf, 0, 0) != 1 {
 		t.Fail()
 	}
-	if readBits(buf, 1, 1) != 1 {
+	if ReadBits(buf, 1, 1) != 1 {
 		t.Fail()
 	}
-	if readBits(buf, 1, 7) != 1 {
+	if ReadBits(buf, 1, 7) != 1 {
 		t.Fail()
 	}
-	if readBits(buf, 1, 10) != 513 {
+	if ReadBits(buf, 1, 10) != 513 {
 		t.Fail()
 	}
-	if readBits(buf, 0, 13) != 11267 {
+	if ReadBits(buf, 0, 13) != 11267 {
 		t.Fail()
 	}
-	if readBits(buf, 5, 15) != 1376 {
+	if ReadBits(buf, 5, 15) != 1376 {
 		t.Fail()
 	}
-	if readBits(buf, 0, 31) != 1669377027 {
+	if ReadBits(buf, 0, 31) != 1669377027 {
 		t.Fail()
 	}
-	if readBits(buf, 13, 30) != 203781 {
+	if ReadBits(buf, 13, 30) != 203781 {
 		t.Fail()
 	}
-	if readBits(buf, 30, 13) != 203781 {
+	if ReadBits(buf, 30, 13) != 203781 {
 		t.Fail()
 	}
-	if readBits(buf, 50, 51) != 0 {
+	if ReadBits(buf, 50, 51) != 0 {
 		t.Fail()
 	}
-	if readBits(buf, 28, 50) != 6 {
+	if ReadBits(buf, 28, 50) != 6 {
 		t.Fail()
 	}
 }
@@ -63,7 +63,7 @@ func TestReadBits(t *testing.T) {
 func TestReadSegments(t *testing.T) {
 	var buf = []byte{218, 73, 85, 117}
 	var shape = []uint{1, 5, 6, 6, 12, 2}
-	var result = readSegments(buf, shape)
+	var result = ReadSegments(buf, shape)
 	var expected = []uint32{0, 13, 39, 20, 3413, 1}
 	if len(expected) != len(result) {
 		t.Errorf("Expected length %d but got %d", len(expected), len(result))
@@ -80,7 +80,7 @@ func TestReadSegments(t *testing.T) {
 func TestReadSegmentsUnderFlow(t *testing.T) {
 	var buf = []byte{218, 73, 85, 117}
 	var shape = []uint{1, 5, 6, 6, 9}
-	var result = readSegments(buf, shape)
+	var result = ReadSegments(buf, shape)
 	var expected = []uint32{0, 13, 39, 20, 341}
 	if len(expected) != len(result) {
 		t.Errorf("Expected length %d but got %d", len(expected), len(result))
@@ -97,7 +97,7 @@ func TestReadSegmentsUnderFlow(t *testing.T) {
 func TestReadSegmentsOverFlow(t *testing.T) {
 	var buf = []byte{218, 73, 85, 117}
 	var shape = []uint{1, 5, 6, 6, 12, 12, 5}
-	var result = readSegments(buf, shape)
+	var result = ReadSegments(buf, shape)
 	var expected = []uint32{0, 13, 39, 20, 3413, 1, 0}
 	if len(expected) != len(result) {
 		t.Errorf("Expected length %d but got %d", len(expected), len(result))
@@ -114,9 +114,9 @@ func TestReadSegmentsOverFlow(t *testing.T) {
 func TestWriteSegments(t *testing.T) {
 	var buf = []byte{218, 73, 85, 117}
 	var shape = []uint{1, 5, 6, 6, 12, 2}
-	var result = readSegments(buf, shape)
+	var result = ReadSegments(buf, shape)
 	var nbuf = []byte{0, 0, 0, 0}
-	writeSegments(nbuf, shape, result)
+	WriteSegments(nbuf, shape, result)
 	for i := 0; i < 4; i++ {
 		if nbuf[i] != buf[i] {
 			t.Errorf("Expected %d but got %d at %d", buf[i], nbuf[i], i)
@@ -126,19 +126,19 @@ func TestWriteSegments(t *testing.T) {
 }
 
 func TestDecodeFloat18(t *testing.T) {
-	var result = decodeFloat18(231079)
+	var result = DecodeFloat18(231079)
 	var expected float32 = -724.875
 	if math.Abs(float64(result-expected)) > 0.00001 {
 		t.Errorf("Expected %.2f but go %.2f", expected, result)
 		t.Fail()
 	}
-	result = decodeFloat18(100980)
+	result = DecodeFloat18(100980)
 	expected = 846.5
 	if math.Abs(float64(result-expected)) > 0.00001 {
 		t.Errorf("Expected %.2f but go %.2f", expected, result)
 		t.Fail()
 	}
-	result = decodeFloat18(97193)
+	result = DecodeFloat18(97193)
 	expected = 442.5625
 	if math.Abs(float64(result-expected)) > 0.00001 {
 		t.Errorf("Expected %.2f but go %.2f", expected, result)
@@ -147,13 +147,13 @@ func TestDecodeFloat18(t *testing.T) {
 }
 
 func TestEncodeFloat18(t *testing.T) {
-	if encodeFloat18(-724.99) != 231079 {
+	if EncodeFloat18(-724.99) != 231079 {
 		t.Fail()
 	}
-	if encodeFloat18(846.53) != 100980 {
+	if EncodeFloat18(846.53) != 100980 {
 		t.Fail()
 	}
-	if encodeFloat18(442.59) != 97193 {
+	if EncodeFloat18(442.59) != 97193 {
 		t.Fail()
 	}
 }
