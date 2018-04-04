@@ -3,7 +3,7 @@ package wjson
 import (
 	"testing"
 
-	"github.com/edwinzhng/wcomms/wbinary"
+	"wcomms/wbinary"
 )
 
 func TestPacketDecodeJson(t *testing.T) {
