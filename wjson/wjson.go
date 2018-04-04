@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"time"
 
-	wbin "github.com/edwinzhng/wcomms/wbinary"
+	wbin "github.com/waterloop/wcomms/wbinary"
 )
 
+// CommPacketJson is the data structure used to send pod data
 type CommPacketJson struct {
 	Time int64     `json:"time"`
 	Type string    `json:"type"`
@@ -14,13 +15,15 @@ type CommPacketJson struct {
 	Data []float32 `json:"data"`
 }
 
-func CurrentTimeMs() int64 {
+// Helper to get time in milliseconds
+func currentTimeMs() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
 }
 
+// PacketEncodeJson converts binary communication packet to JSON string/bytes
 func PacketEncodeJson(packet *wbin.CommPacket) ([]byte, error) {
 	packetJson := &CommPacketJson{
-		Time: CurrentTimeMs(),
+		Time: currentTimeMs(),
 		Type: wbin.TypeToString(packet.PacketType),
 		Id:   packet.PacketId,
 		Data: []float32{packet.Data1, packet.Data2, packet.Data3},
@@ -28,6 +31,7 @@ func PacketEncodeJson(packet *wbin.CommPacket) ([]byte, error) {
 	return json.Marshal(packetJson)
 }
 
+// PacketDecodeJson converts JSON string/bytes to binary communication packet
 func PacketDecodeJson(encoded []byte) (*wbin.CommPacket, error) {
 	packetJson := &CommPacketJson{}
 	err := json.Unmarshal(encoded, packetJson)
