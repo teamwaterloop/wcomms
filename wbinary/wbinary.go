@@ -61,7 +61,7 @@ type CommPacket struct {
 // Reads no more than 32 bits at a time from
 // a byte buffer between the start position i
 // and end position j, inclusive
-func readBits(buf []byte, i uint, j uint) uint32 {
+func ReadBits(buf []byte, i uint, j uint) uint32 {
 	if i > j {
 		j, i = i, j
 	}
@@ -91,7 +91,7 @@ func readBits(buf []byte, i uint, j uint) uint32 {
 	return res
 }
 
-func setBits(buf []byte, bits uint32, i uint, length uint) {
+func SetBits(buf []byte, bits uint32, i uint, length uint) {
 	bits &= 0xffffffff >> (0x20 - length)
 	j := i + length - 1
 	iStart := i / 8
@@ -121,27 +121,27 @@ func setBits(buf []byte, bits uint32, i uint, length uint) {
 
 // Read segments of bits, no larger than
 // 32 bits as defined by shape
-func readSegments(buf []byte, shape []uint) []uint32 {
+func ReadSegments(buf []byte, shape []uint) []uint32 {
 	shapeLen := uint(len(shape))
 	bufLen := uint(len(buf))
 	var i uint = 0
 	var k uint = 0
 	result := make([]uint32, shapeLen, shapeLen)
 	for i < bufLen*8 && k < shapeLen {
-		result[k] = readBits(buf, i, i+shape[k]-1)
+		result[k] = ReadBits(buf, i, i+shape[k]-1)
 		i += shape[k]
 		k++
 	}
 	return result
 }
 
-func writeSegments(buf []byte, shape []uint, values []uint32) {
+func WriteSegments(buf []byte, shape []uint, values []uint32) {
 	shapeLen := uint(len(shape))
 	bufLen := uint(len(buf))
 	var k uint = 0
 	var i uint = 0
 	for i < bufLen*8 && k < shapeLen {
-		setBits(buf, values[k], i, shape[k])
+		SetBits(buf, values[k], i, shape[k])
 		i += shape[k]
 		k++
 	}
@@ -149,7 +149,7 @@ func writeSegments(buf []byte, shape []uint, values []uint32) {
 
 // Floating point specifications:
 // [decimalPart:7][integerPart:10][sign:1]
-func decodeFloat18(bits uint32) float32 {
+func DecodeFloat18(bits uint32) float32 {
 	if bits == 0 {
 		// Bit of a hack in place of a better compression algorithm
 		// I'm too lazy to port https://goo.gl/ftEgQ1
@@ -162,7 +162,7 @@ func decodeFloat18(bits uint32) float32 {
 	return math.Float32frombits(expanded)
 }
 
-func encodeFloat18(val float32) uint32 {
+func EncodeFloat18(val float32) uint32 {
 	// Compress bits
 	bits := math.Float32bits(val)
 	compressed := (bits & 0x7ff800) >> 11
@@ -175,13 +175,13 @@ func encodeFloat18(val float32) uint32 {
 // structure. Function will try to read as much
 // data as possible.
 func ReadPacket(buf []byte) *CommPacket {
-	var bitSegments = readSegments(buf, packetStructure)
+	var bitSegments = ReadSegments(buf, packetStructure)
 	return &CommPacket{
 		PacketType: PacketType(bitSegments[0]),
 		PacketId:   uint8(bitSegments[1]),
-		Data1:      decodeFloat18(bitSegments[2]),
-		Data2:      decodeFloat18(bitSegments[3]),
-		Data3:      decodeFloat18(bitSegments[4]),
+		Data1:      DecodeFloat18(bitSegments[2]),
+		Data2:      DecodeFloat18(bitSegments[3]),
+		Data3:      DecodeFloat18(bitSegments[4]),
 	}
 }
 
@@ -189,10 +189,10 @@ func WritePacket(packet *CommPacket) []byte {
 	var bitSegments = make([]uint32, 5, 5)
 	bitSegments[0] = uint32(packet.PacketType)
 	bitSegments[1] = uint32(packet.PacketId)
-	bitSegments[2] = encodeFloat18(packet.Data1)
-	bitSegments[3] = encodeFloat18(packet.Data2)
-	bitSegments[4] = encodeFloat18(packet.Data3)
+	bitSegments[2] = EncodeFloat18(packet.Data1)
+	bitSegments[3] = EncodeFloat18(packet.Data2)
+	bitSegments[4] = EncodeFloat18(packet.Data3)
 	var buf = make([]byte, 8, 8)
-	writeSegments(buf, packetStructure, bitSegments)
+	WriteSegments(buf, packetStructure, bitSegments)
 	return buf
 }
